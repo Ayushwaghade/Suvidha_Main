@@ -1,0 +1,82 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-background",
+      "description": "A bright and clean living room.",
+      "imageUrl": "https://images.unsplash.com/photo-1551713161-57985fb35b99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjbGVhbiUyMGxpdmluZyUyMHJvb218ZW58MHx8fHwxNzY4ODE0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "clean living room"
+    },
+    {
+      "id": "plumbing-service",
+      "description": "A plumber fixing a sink.",
+      "imageUrl": "https://images.unsplash.com/photo-1750749761538-3aea36066a4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwbHVtYmVyJTIwd29ya2luZ3xlbnwwfHx8fDE3Njg3MzU3NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "plumber working"
+    },
+    {
+      "id": "cleaning-service",
+      "description": "Cleaning supplies on a clean surface.",
+      "imageUrl": "https://images.unsplash.com/photo-1550963295-019d8a8a61c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjbGVhbmluZyUyMHN1cHBsaWVzfGVufDB8fHx8MTc2ODcyMTUwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cleaning supplies"
+    },
+    {
+      "id": "electrical-service",
+      "description": "An electrician working on a circuit board.",
+      "imageUrl": "https://images.unsplash.com/photo-1744591433649-28069739f80b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxlbGVjdHJpY2lhbiUyMHdvcmt8ZW58MHx8fHwxNzY4ODM0NjA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "electrician work"
+    },
+    {
+      "id": "painting-service",
+      "description": "A wall being painted with a roller.",
+      "imageUrl": "https://images.unsplash.com/photo-1688372198189-de6a51777a81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwYWludGluZyUyMHdhbGx8ZW58MHx8fHwxNzY4NzM4MTY2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "painting wall"
+    },
+    {
+      "id": "carpentry-service",
+      "description": "A carpenter working with wood.",
+      "imageUrl": "https://images.unsplash.com/photo-1679407262907-b703481b4d9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjYXJwZW50ZXIlMjB3b29kfGVufDB8fHx8MTc2ODc5OTA5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "carpenter wood"
+    },
+    {
+      "id": "gardening-service",
+      "description": "A person gardening in a lush garden.",
+      "imageUrl": "https://images.unsplash.com/photo-1748268595933-642a15824f5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Z2FyZGVuaW5nJTIwcGxhbnRzfGVufDB8fHx8MTc2ODcxMTAzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gardening plants"
+    },
+    {
+      "id": "avatar-1",
+      "description": "Avatar of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1635131902146-6957477a4ff4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBzbWlsaW5nfGVufDB8fHx8MTc2ODc2NzUzNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person smiling"
+    },
+    {
+      "id": "avatar-2",
+      "description": "Avatar of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njg3NzQ4OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar-3",
+      "description": "Avatar of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1486565273886-f8309bda62b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwZXJzb24lMjBsb29raW5nfGVufDB8fHx8MTc2ODc2NTU0N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person looking"
+    },
+    {
+      "id": "avatar-4",
+      "description": "Avatar of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1642667226859-a2d0f9e74a21?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcHJvZmlsZXxlbnwwfHx8fDE3Njg4MTE4NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person profile"
+    },
+    {
+      "id": "avatar-5",
+      "description": "Avatar of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1656582117510-3a177bf866c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBoYXBweXxlbnwwfHx8fDE3Njg4MjIxMTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person happy"
+    },
+    {
+      "id": "avatar-6",
+      "description": "Avatar of a user.",
+      "imageUrl": "https://images.unsplash.com/photo-1644943710794-3c48deca2cc1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBmcmllbmRseXxlbnwwfHx8fDE3Njg4MzQ2MDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person friendly"
+    }
+  ]
+}
