@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
-import { Loader2, Check, X, Star } from "lucide-react";
+import { Loader2, Check, X, Star, Video, Phone, MapPin } from "lucide-react"; // Added Phone & MapPin
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -39,7 +39,13 @@ export default function BookingsPage() {
     const fetchBookings = async () => {
       try {
         const res = await api.get('/bookings');
-        setBookings(res.data);
+        
+        // SORT BY CREATION DATE: Most recent on top
+        const sortedBookings = res.data.sort((a: any, b: any) => {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+        
+        setBookings(sortedBookings);
       } catch (error) {
         console.error("Failed to fetch bookings", error);
       } finally {
@@ -53,15 +59,14 @@ export default function BookingsPage() {
     try {
       await api.patch(`/bookings/${bookingId}/status`, { status: newStatus });
       setBookings(bookings.map(b => b._id === bookingId ? { ...b, status: newStatus } : b));
+      toast({ title: `Booking ${newStatus}` });
     } catch (error) {
-      alert("Failed to update booking status.");
+      toast({ variant: "destructive", title: "Update failed" });
     }
   };
 
   const handleSubmitReview = async () => {
-    if (rating === 0) return toast({ variant: "destructive", title: "Error", description: "Please select a rating." });
-    if (!comment.trim()) return toast({ variant: "destructive", title: "Error", description: "Please write a review." });
-
+    if (rating === 0 || !comment.trim()) return;
     setSubmittingReview(true);
     try {
       await api.post('/reviews', {
@@ -70,16 +75,11 @@ export default function BookingsPage() {
         rating,
         comment
       });
-
-      toast({ title: "Review Submitted", description: "Thank you for your feedback!" });
-      
       setBookings(bookings.map(b => b._id === reviewBookingId ? { ...b, isReviewed: true } : b));
-      
       setReviewBookingId(null);
-      setRating(0);
-      setComment("");
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Failed to submit", description: error.response?.data?.msg || "Something went wrong." });
+      toast({ title: "Review Submitted" });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Review failed" });
     } finally {
       setSubmittingReview(false);
     }
@@ -99,84 +99,119 @@ export default function BookingsPage() {
     const partnerName = isSeeker ? provider?.name : seeker?.name;
     const partnerCity = isSeeker ? provider?.city : seeker?.city;
     const isFutureBooking = booking.date ? new Date(booking.date) > new Date() : false;
-
-    // Safely extract the ID whether it's a raw string or an object
     const safeProviderId = typeof provider === 'string' ? provider : provider?._id || provider?.id;
     
+    // Privacy Shield: Only show contact info if the booking is confirmed or completed
+    const showContactInfo = ['confirmed', 'completed'].includes(booking.status);
+
     return (
-      <Card key={booking._id} className="shadow-sm">
-        <CardHeader>
+      <Card key={booking._id} className="shadow-sm border-l-4 border-l-primary transition-all hover:shadow-md">
+        <CardHeader className="pb-3">
           <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
             <div>
-                <CardTitle className="text-xl font-headline">{booking.service}</CardTitle>
-                <CardDescription>{booking.date ? format(new Date(booking.date), "PPP 'at' p") : 'Date not set'}</CardDescription>
+                <CardTitle className="text-xl font-headline flex items-center gap-2">
+                  {booking.service}
+                  {booking.serviceMode === 'online' && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 border-none">Online Call</Badge>
+                  )}
+                </CardTitle>
+                <CardDescription className="font-medium text-foreground/70">
+                   {booking.date ? format(new Date(booking.date), "EEEE, MMM do 'at' p") : 'Date not set'}
+                </CardDescription>
             </div>
-            <Badge variant={booking.status === 'completed' ? 'default' : booking.status === 'cancelled' ? 'destructive' : booking.status === 'confirmed' ? 'outline' : 'secondary'} className="w-fit capitalize">
+            <Badge variant={booking.status === 'completed' ? 'default' : booking.status === 'cancelled' ? 'destructive' : 'outline'} className="w-fit capitalize px-3 py-1">
                 {booking.status}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
-            <div className="flex items-center gap-4">
-                <Avatar>
+
+        <CardContent className="space-y-6">
+            <div className="flex items-center gap-4 bg-muted/30 p-3 rounded-lg">
+                <Avatar className="h-12 w-12 border border-primary/20">
                     <AvatarFallback>{partnerName?.charAt(0) || '?'}</AvatarFallback>
                 </Avatar>
-                <div>
-                    <p className="font-semibold">{isSeeker ? 'Provider' : 'Client'}: {partnerName || 'Unknown'}</p>
+                <div className="flex-1">
+                    <p className="text-xs uppercase text-muted-foreground font-bold">{isSeeker ? 'Provider' : 'Client'}</p>
+                    <p className="font-bold text-lg leading-tight">{partnerName || 'Unknown'}</p>
                     <p className="text-sm text-muted-foreground">{partnerCity}</p>
-                    {booking.price && <p className="text-sm font-medium text-primary mt-1">Agreed Price: ₹{booking.price}</p>}
                 </div>
+                {booking.price && (
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">Price</p>
+                    <p className="text-xl font-black text-primary">₹{booking.price}</p>
+                  </div>
+                )}
             </div>
-            
-            {/* Provider Actions */}
-            {!isSeeker && booking.status === 'pending' && (
-              <div className="flex gap-3 mt-6 border-t pt-4">
-                <Button onClick={() => handleUpdateStatus(booking._id, 'confirmed')} className="w-full bg-green-600 hover:bg-green-700 text-white"><Check className="mr-2 h-4 w-4" /> Accept</Button>
-                <Button onClick={() => handleUpdateStatus(booking._id, 'cancelled')} variant="destructive" className="w-full"><X className="mr-2 h-4 w-4" /> Decline</Button>
+
+            {/* --- CONTACT & ADDRESS SECTION --- */}
+            {showContactInfo && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border rounded-xl bg-primary/[0.02] border-dashed border-primary/30">
+                <div className="flex items-start gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full"><Phone className="h-4 w-4 text-primary" /></div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground">Mobile Number</p>
+                    <p className="text-sm font-semibold">{booking.phone || "Not Shared"}</p>
+                  </div>
+                </div>
+                {booking.serviceMode === 'in-person' && (
+                  <div className="flex items-start gap-3">
+                    <div className="bg-primary/10 p-2 rounded-full"><MapPin className="h-4 w-4 text-primary" /></div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground">Service Address</p>
+                      <p className="text-sm font-semibold leading-snug">{booking.address || "Address Hidden"}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-            {!isSeeker && booking.status === 'confirmed' && (
-                <div className="mt-6 border-t pt-4 flex flex-col gap-2">
-                <Button onClick={() => handleUpdateStatus(booking._id, 'completed')} className="w-full" disabled={isFutureBooking}>
-                  {isFutureBooking ? 'Service Date Pending...' : 'Mark as Completed'}
-                </Button>
+
+            {/* Online Consultation Banner */}
+            {booking.serviceMode === 'online' && booking.meetingLink && booking.status !== 'cancelled' && (
+                <div className="p-4 bg-blue-600 text-white rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg shadow-blue-500/20">
+                    <div className="flex items-center gap-3">
+                        <Video className="h-6 w-6" />
+                        <div>
+                           <p className="font-bold">Virtual Consultation Ready</p>
+                           <p className="text-xs opacity-90">Meeting link generated automatically.</p>
+                        </div>
+                    </div>
+                    {booking.status !== 'completed' && (
+                      <Button asChild variant="secondary" size="sm" className="font-bold">
+                          <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">Join Video Room</a>
+                      </Button>
+                    )}
                 </div>
+            )}
+            
+            {/* Actions for Provider */}
+            {!isSeeker && (
+              <div className="pt-2">
+                {booking.status === 'pending' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button onClick={() => handleUpdateStatus(booking._id, 'confirmed')} className="bg-green-600 hover:bg-green-700">Accept</Button>
+                    <Button onClick={() => handleUpdateStatus(booking._id, 'cancelled')} variant="destructive">Decline</Button>
+                  </div>
+                )}
+                {booking.status === 'confirmed' && (
+                  <Button onClick={() => handleUpdateStatus(booking._id, 'completed')} className="w-full h-11" disabled={isFutureBooking}>
+                    {isFutureBooking ? 'Waiting for Service Time...' : 'Mark Job as Completed'}
+                  </Button>
+                )}
+              </div>
             )}
 
-            {/* Provider viewing review notification */}
-            {!isSeeker && booking.status === 'completed' && booking.isReviewed && (
-                <div className="mt-6 border-t pt-4 text-center">
-                    <p className="text-sm text-muted-foreground flex items-center justify-center gap-2 mb-3">
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" /> 
-                        The client left a review for your service!
-                    </p>
-                    <Button variant="outline" asChild className="w-full">
-                        <Link href={`/provider/${safeProviderId}`}>Read Review on Profile</Link>
-                    </Button>
-                </div>
-            )}
-
-            {/* Seeker Actions */}
-            {isSeeker && booking.status === 'completed' && !booking.isReviewed && (
-                <div className="mt-6 border-t pt-4">
-                    <Button 
-                        variant="outline" 
-                        className="w-full border-primary text-primary hover:bg-primary/10"
-                        onClick={() => {
-                            setReviewBookingId(booking._id);
-                            // CORRECTED: Ensure we use safeProviderId here so it doesn't crash on undefined!
-                            setReviewProviderId(safeProviderId); 
-                        }}
-                    >
-                        <Star className="mr-2 h-4 w-4" /> Leave a Review
-                    </Button>
-                </div>
-            )}
-            {isSeeker && booking.status === 'completed' && booking.isReviewed && (
-                <div className="mt-6 border-t pt-4">
-                    <p className="text-sm text-center text-muted-foreground flex items-center justify-center gap-2">
-                        <Check className="h-4 w-4 text-green-500" /> You reviewed this service
-                    </p>
+            {/* Actions for Seeker */}
+            {isSeeker && booking.status === 'completed' && (
+                <div className="pt-2">
+                    {!booking.isReviewed ? (
+                      <Button variant="outline" className="w-full border-primary text-primary font-bold" onClick={() => { setReviewBookingId(booking._id); setReviewProviderId(safeProviderId); }}>
+                        <Star className="mr-2 h-4 w-4" /> Rate Experience
+                      </Button>
+                    ) : (
+                      <div className="text-center text-sm font-medium text-green-600 flex items-center justify-center gap-2 bg-green-50 py-2 rounded-lg">
+                        <Check className="h-4 w-4" /> Review Submitted Successfully
+                      </div>
+                    )}
                 </div>
             )}
         </CardContent>
@@ -185,58 +220,45 @@ export default function BookingsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold font-headline">My Bookings</h1>
+    <div className="container max-w-4xl mx-auto space-y-8 pb-10">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-4xl font-black font-headline tracking-tight">Manage Bookings</h1>
+          <p className="text-muted-foreground">Keep track of your appointments and history.</p>
+        </div>
+      </div>
 
       <Tabs defaultValue="active" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 max-w-md">
-          <TabsTrigger value="active">Active ({activeBookings.length})</TabsTrigger>
-          <TabsTrigger value="history">History ({historyBookings.length})</TabsTrigger>
+        <TabsList className="bg-muted/50 p-1 mb-6">
+          <TabsTrigger value="active" className="px-8 font-bold">Current Jobs</TabsTrigger>
+          <TabsTrigger value="history" className="px-8 font-bold">Past History</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="active" className="space-y-6">
+        <TabsContent value="active" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           {activeBookings.length === 0 ? (
-             <Card><CardContent className="p-12 text-center text-muted-foreground"><p>You have no active bookings.</p></CardContent></Card>
-          ) : (
-            <div className="grid gap-6">
-              {activeBookings.map(renderBookingCard)}
-            </div>
-          )}
+             <div className="text-center py-20 border-2 border-dashed rounded-3xl"><p className="text-muted-foreground font-medium">No active bookings right now.</p></div>
+          ) : activeBookings.map(renderBookingCard)}
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-6">
+        <TabsContent value="history" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           {historyBookings.length === 0 ? (
-             <Card><CardContent className="p-12 text-center text-muted-foreground"><p>Your booking history is empty.</p></CardContent></Card>
-          ) : (
-            <div className="grid gap-6">
-              {historyBookings.map(renderBookingCard)}
-            </div>
-          )}
+             <div className="text-center py-20 border-2 border-dashed rounded-3xl"><p className="text-muted-foreground font-medium">Your history is currently empty.</p></div>
+          ) : historyBookings.map(renderBookingCard)}
         </TabsContent>
       </Tabs>
 
-      <Dialog open={!!reviewBookingId} onOpenChange={(open) => !open && setReviewBookingId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rate your experience</DialogTitle>
-            <DialogDescription>Your feedback helps others find great service providers.</DialogDescription>
-          </DialogHeader>
+      {/* Review Dialog */}
+      <Dialog open={!!reviewBookingId} onOpenChange={(o) => !o && setReviewBookingId(null)}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader><DialogTitle className="text-2xl font-headline">Review Service</DialogTitle></DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="flex flex-col items-center justify-center space-y-2">
-                <p className="font-medium">Tap to rate</p>
-                <StarRating rating={rating} onRatingChange={setRating} interactive totalStars={5} size={32} />
+            <div className="flex flex-col items-center gap-3">
+                <p className="font-bold text-sm">How was your experience?</p>
+                <StarRating rating={rating} onRatingChange={setRating} interactive size={40} />
             </div>
-            <div className="space-y-2">
-                <p className="font-medium text-sm">Write a review</p>
-                <Textarea 
-                    placeholder="Tell us about the service quality, professionalism, etc." 
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    rows={4}
-                />
-            </div>
-            <Button onClick={handleSubmitReview} className="w-full" disabled={submittingReview}>
-                {submittingReview && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit Review
+            <Textarea placeholder="Share a few words about the provider's work..." value={comment} onChange={(e) => setComment(e.target.value)} rows={4} className="resize-none" />
+            <Button onClick={handleSubmitReview} className="w-full h-12 text-lg font-bold" disabled={submittingReview}>
+                {submittingReview ? <Loader2 className="animate-spin h-5 w-5" /> : "Submit My Review"}
             </Button>
           </div>
         </DialogContent>

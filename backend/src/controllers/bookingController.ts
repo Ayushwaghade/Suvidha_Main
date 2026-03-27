@@ -6,30 +6,46 @@ import ServiceProvider from '../models/ServiceProvider'; // <-- Add this import!
 // Create Booking
 export const createBooking = async (req: any, res: Response) => {
   try {
-    const { providerId, date, service, notes } = req.body;
-    
-    const provider = await ServiceProvider.findById(providerId);
-    let lockedPrice = 0;
+    // 1. Destructure the NEW fields from the request body
+    const { 
+      providerId, 
+      service, 
+      date, 
+      notes, 
+      price, 
+      serviceMode, 
+      phone,    // <-- ADD THIS
+      address,  // <-- ADD THIS
+      paymentStatus 
+    } = req.body;
 
-    if (provider && provider.offeredServices) {
-      const selectedService = provider.offeredServices.find((s: any) => s.name === service);
-      if (selectedService) {
-        lockedPrice = selectedService.price;
-      }
+    // 2. Meeting link logic (Keep this as is)
+    let meetingLink = "";
+    if (serviceMode === 'online') {
+      const uniqueId = Math.random().toString(36).substring(2, 10);
+      meetingLink = `https://meet.jit.si/SuvidhaConsult_${req.user.id.substring(0,5)}_${uniqueId}`;
     }
 
+    // 3. Create the booking with the NEW fields
     const booking = new Booking({
       seekerId: req.user.id,
       providerId,
-      date,
       service,
-      notes,      
+      date,
+      notes,
+      price,
+      status: paymentStatus === 'paid' ? 'confirmed' : 'pending',
+      serviceMode: serviceMode || 'in-person',
+      meetingLink,
+      paymentStatus: paymentStatus || 'pending',
+      phone,    // <-- PASS TO MONGOOSE
+      address   // <-- PASS TO MONGOOSE
     });
 
     await booking.save();
     res.json(booking);
   } catch (err) {
-    console.error("Create Booking Error:", err);
+    console.error("Create Booking Error:", err); // This is where your error logged from
     res.status(500).send('Server Error');
   }
 };

@@ -22,7 +22,8 @@ const serviceProviderSchema = new mongoose.Schema({
   offeredServices: [{
     name: { type: String, required: true },
     category: { type: String, required: true },
-    price: { type: Number, required: true }
+    price: { type: Number, required: true },
+    deliveryMode: { type: String, enum: ['in-person', 'online', 'both'], default: 'in-person' }
   }],
   bio: { type: String },
   experience: { type: Number },

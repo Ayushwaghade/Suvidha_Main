@@ -7,6 +7,7 @@ import providerRoutes from './routes/providerRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import jobRoutes from './routes/jobRoutes';
+import userRoutes from './routes/userRoutes';
 dotenv.config();
 connectDB();
 
@@ -21,6 +22,7 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/users', userRoutes); 
 
 const PORT = process.env.PORT || 5000;
 

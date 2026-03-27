@@ -9,7 +9,8 @@ const bidSchema = new mongoose.Schema({
     type: String, 
     enum: ['pending', 'accepted', 'rejected'], 
     default: 'pending' 
-  }
+  },
+  phone: { type: String },
 }, { timestamps: true });
 
 export default mongoose.model('Bid', bidSchema);

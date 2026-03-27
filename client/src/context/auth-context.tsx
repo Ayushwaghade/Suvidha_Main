@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, pass: string) => Promise<boolean>; // Changed to async
+  login: (email: string, pass: string) => Promise<boolean>;
   logout: () => void;
-  register: (userData: any) => Promise<boolean>; // Changed to async
+  register: (userData: any) => Promise<boolean>;
+  updateUser: (userData: User) => void; // --- NEW FUNCTION ---
   loading: boolean;
 }
 
@@ -23,21 +24,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user'); // Storing user info locally for persistence
+      const storedUser = localStorage.getItem('user');
       
       if (token && storedUser) {
-        setUser(JSON.parse(storedUser));
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error("Failed to parse stored user", e);
+          localStorage.removeItem('user');
+        }
       }
       setLoading(false);
     };
     checkAuth();
   }, []);
 
+  // --- NEW: Sync local state and localStorage with updated profile data ---
+  const updateUser = (userData: User) => {
+    // 1. Update React State
+    setUser(userData);
+    // 2. Update LocalStorage so it persists on refresh
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const login = async (email: string, pass: string) => {
     try {
       const res = await api.post('/auth/login', { email, password: pass });
       
-      // Save data
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       
@@ -72,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
